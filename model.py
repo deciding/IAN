@@ -23,12 +23,12 @@ class IAN(object):
 
     def build_model(self):
         with tf.name_scope('inputs'):
-            self.aspects = tf.placeholder(tf.int32, [None, self.max_aspect_len])
-            self.contexts = tf.placeholder(tf.int32, [None, self.max_context_len])
-            self.labels = tf.placeholder(tf.int32, [None, self.n_class])
-            self.aspect_lens = tf.placeholder(tf.int32, None)
-            self.context_lens = tf.placeholder(tf.int32, None)
-            self.dropout_keep_prob = tf.placeholder(tf.float32)
+            self.aspects = tf.placeholder(tf.int32, [None, self.max_aspect_len], name='aspects')
+            self.contexts = tf.placeholder(tf.int32, [None, self.max_context_len], name='contexts')
+            self.labels = tf.placeholder(tf.int32, [None, self.n_class], name='labels')
+            self.aspect_lens = tf.placeholder(tf.int32, None, name='aspect_lens')
+            self.context_lens = tf.placeholder(tf.int32, None, name='context_lens')
+            self.dropout_keep_prob = tf.placeholder(tf.float32, name='dropout_keep_prob')
             
             aspect_inputs = tf.nn.embedding_lookup(self.embedding_matrix, self.aspects)
             aspect_inputs = tf.cast(aspect_inputs, tf.float32)
@@ -154,15 +154,16 @@ class IAN(object):
             
             self.reps = tf.concat([self.aspect_reps, self.context_reps], 1)
             self.predict = tf.matmul(self.reps, weights['softmax']) + biases['softmax']
+            self.predict = tf.identity(self.predict, name='predict_id')
 
         with tf.name_scope('loss'):
-            self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits = self.predict, labels = self.labels))
+            self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits = self.predict, labels = self.labels), name='cost')
             self.global_step = tf.Variable(0, name="tr_global_step", trainable=False)
             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.cost, global_step=self.global_step)
 
         with tf.name_scope('predict'):
             self.correct_pred = tf.equal(tf.argmax(self.predict, 1), tf.argmax(self.labels, 1))
-            self.accuracy = tf.reduce_sum(tf.cast(self.correct_pred, tf.int32))
+            self.accuracy = tf.reduce_sum(tf.cast(self.correct_pred, tf.int32), name='accuracy')
             
         summary_loss = tf.summary.scalar('loss', self.cost)
         summary_acc = tf.summary.scalar('acc', self.accuracy)
@@ -223,11 +224,25 @@ class IAN(object):
         print('Finishing analyzing testing data')
     
     def run(self, train_data, test_data):
-        saver = tf.train.Saver(tf.trainable_variables())
+        #saver = tf.train.Saver(tf.trainable_variables())
+        saver = tf.train.Saver()
 
         print('Training ...')
         self.sess.run(tf.global_variables_initializer())
         max_acc, step = 0., -1
+        inputs={
+            "aspects":self.aspects,
+            "contexts":self.contexts,
+            "labels":self.labels,
+            "aspect_lens":self.aspect_lens,
+            "context_lens":self.context_lens,
+            "dropout_keep_prob":self.dropout_keep_prob,
+        }
+        outputs={
+            "cost":self.cost,
+            "accuracy":self.accuracy,
+            "predict":self.predict,
+        }
         for i in range(self.n_epoch):
             train_loss, train_acc = self.train(train_data)
             test_loss, test_acc = self.test(test_data)
@@ -235,6 +250,7 @@ class IAN(object):
                 max_acc = test_acc
                 step = i
                 saver.save(self.sess, 'models/model_iter', global_step=step)
+                tf.saved_model.simple_save(self.sess, 'models2/iter_'+str(step), inputs, outputs)
             print('epoch %s: train-loss=%.6f; train-acc=%.6f; test-loss=%.6f; test-acc=%.6f;' % (str(i), train_loss, train_acc, test_loss, test_acc))
         saver.save(self.sess, 'models/model_final')
         print('The max accuracy of testing results is %s of step %s' % (max_acc, step))
