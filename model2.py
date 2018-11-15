@@ -317,9 +317,9 @@ class IAN(object):
         aspects, lcontexts, rcontexts, labels, aspect_lens, lcontext_lens, rcontext_lens = train_data
         with open('analysis2/train_' + str(timestamp) + '.txt', 'w') as f:
             for sample, num in self.get_batch_data(aspects, lcontexts, rcontexts, labels, aspect_lens, lcontext_lens, rcontext_lens, len(aspects), False, 1.0):
-                laspect_atts, raspect_atts, lcontext_atts, rcontext_atts, correct_pred = self.sess.run([self.laspect_atts, self.raspect_att, self.lcontext_atts, self.rcontext_atts, self.correct_pred], feed_dict=sample)
+                laspect_atts, raspect_atts, lcontext_atts, rcontext_atts, correct_pred = self.sess.run([self.laspect_atts, self.raspect_atts, self.lcontext_atts, self.rcontext_atts, self.correct_pred], feed_dict=sample)
 
-                for a, b, c, d, e in zip(laspect_atts, raspect_atts, lcontext_atts, rcontext_attr, correct_pred):
+                for a, b, c, d, e in zip(laspect_atts, raspect_atts, lcontext_atts, rcontext_atts, correct_pred):
                     a = str(a).replace('\n', '')
                     b = str(b).replace('\n', '')
                     c = str(c).replace('\n', '')
@@ -330,8 +330,8 @@ class IAN(object):
         aspects, lcontexts, rcontexts, labels, aspect_lens, lcontext_lens, rcontext_lens = test_data
         with open('analysis2/test_' + str(timestamp) + '.txt', 'w') as f:
             for sample, num in self.get_batch_data(aspects, lcontexts, rcontexts, labels, aspect_lens, lcontext_lens, rcontext_lens, len(aspects), False, 1.0):
-                laspect_atts, raspect_atts, lcontext_atts, rcontext_atts, correct_pred = self.sess.run([self.laspect_atts, self.raspect_att, self.lcontext_atts, self.rcontext_atts, self.correct_pred], feed_dict=sample)
-                for a, b, c, d, e in zip(laspect_atts, raspect_atts, lcontext_atts, rcontext_attr, correct_pred):
+                laspect_atts, raspect_atts, lcontext_atts, rcontext_atts, correct_pred = self.sess.run([self.laspect_atts, self.raspect_atts, self.lcontext_atts, self.rcontext_atts, self.correct_pred], feed_dict=sample)
+                for a, b, c, d, e in zip(laspect_atts, raspect_atts, lcontext_atts, rcontext_atts, correct_pred):
                     a = str(a).replace('\n', '')
                     b = str(b).replace('\n', '')
                     c = str(c).replace('\n', '')
