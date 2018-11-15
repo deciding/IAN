@@ -1,6 +1,6 @@
 import tensorflow as tf
 from utils import get_data_info, read_data_lr, load_word_embeddings, get_batch_index
-from model2 import IAN
+from model3 import IAN
 from tensorflow.python.saved_model import tag_constants
 import numpy as np
 import os
@@ -27,7 +27,7 @@ embedding_file = open('embedding_file2l.obj','rb')
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('embedding_dim', 300, 'dimension of word embedding')
 tf.app.flags.DEFINE_integer('batch_size', 128, 'number of example per batch')
-tf.app.flags.DEFINE_integer('n_epoch', 10, 'number of epoch')
+tf.app.flags.DEFINE_integer('n_epoch', 20, 'number of epoch')
 tf.app.flags.DEFINE_integer('n_hidden', 300, 'number of hidden unit')
 tf.app.flags.DEFINE_integer('n_class', 3, 'number of distinct class')
 tf.app.flags.DEFINE_integer('pre_processed', 0, 'Whether the data is pre-processed')
@@ -36,7 +36,7 @@ tf.app.flags.DEFINE_float('l2_reg', 0.001, 'l2 regularization')
 tf.app.flags.DEFINE_float('dropout', 0.5, 'dropout')
 
 tf.app.flags.DEFINE_string('embedding_file_name', 'data/glove.840B.300d.txt', 'embedding file name')
-tf.app.flags.DEFINE_string('dataset', 'data/laptop/', 'the directory of dataset')
+tf.app.flags.DEFINE_string('dataset', 'data/restaurant/', 'the directory of dataset')
 
 tf.app.flags.DEFINE_integer('max_aspect_len', 0, 'max length of aspects')
 tf.app.flags.DEFINE_integer('max_context_len', 0, 'max length of contexts')
